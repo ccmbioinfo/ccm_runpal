@@ -1,0 +1,9 @@
+name: runpal
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pip
+  - pip:
+      - pydantic
+      - docker
