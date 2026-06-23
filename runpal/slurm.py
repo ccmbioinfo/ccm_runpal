@@ -7,11 +7,13 @@ from functools import wraps
 from typing import Optional
 
 import openapi_slurm
-
+from openapi_slurm.models.v0043_job_submit_req import V0043JobSubmitReq as JobSubmitRequest
+from openapi_slurm.models.v0043_job_desc_msg import V0043JobDescMsg as SlurmJob
 import jwt
 import paramiko
 from jwt.exceptions import ExpiredSignatureError
 
+from runpal.utils import TokenFetchError
 
 class SlurmRunner:
     """
