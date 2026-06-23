@@ -1,4 +1,17 @@
+from typing import Optional
 from pydantic import BaseModel, ConfigDict
+
+#this is sickkids hpc specific
+GPU_MAP = {
+    "p100": "Tesla_P100-PCIE-16GB",
+    "v100": "Tesla_V100-PCIE-32GB",
+    "p40": "Tesla_P40",
+    "l40": "NVIDIA_L40S",
+    "h100": "NVIDIA_H100_NVL",
+    "h100_80": "NVIDIA_H100_80GB_HBM3",
+    "a100": "NVIDIA_A100_80GB_PCIe",
+}
+
 
 class TokenFetchError(Exception):
     """
