@@ -3,7 +3,10 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - python=3.12
   - pip
   - pip:
       - pydantic
       - docker
+      - paramiko
+      - git+https://github.com/ccmbioinfo/openapi-slurm.git
