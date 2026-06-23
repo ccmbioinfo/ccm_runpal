@@ -1,10 +1,9 @@
+import os
 import subprocess
 from pathlib import Path
 import shlex
-from typing import Optional, Dict
+from typing import Dict
 import tempfile
-
-from pydantic import BaseModel, ConfigDict
 
 from runpal.utils import *
 
@@ -49,15 +48,7 @@ class ContainerRunner:
             if not self._docker_image_exists(self.image_name):
                 raise ContainerError(f"Docker image does not exist locally: {self.image_name}.")
 
-    GPU_MAP = {
-        "p100": "Tesla_P100-PCIE-16GB",
-        "v100": "Tesla_V100-PCIE-32GB",
-        "p40": "Tesla_P40",
-        "l40": "NVIDIA_L40S",
-        "h100": "NVIDIA_H100_NVL",
-        "h100_80": "NVIDIA_H100_80GB_HBM3",
-        "a100": "NVIDIA_A100_80GB_PCIe",
-    }
+
 
     def _docker_image_exists(self, image_name: str) -> bool:
         """
