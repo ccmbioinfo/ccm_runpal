@@ -5,13 +5,11 @@
 
 <p align="center">
     <a href="" alt="Activity">
-        <img src="https://img.shields.io/github/commit-activity/m/ccmbioinfo/runpal" /></a>
+        <img src="https://img.shields.io/github/commit-activity/m/ccmbioinfo/ccm_runpal" /></a>
     <a href="" alt="stars">
-        <img src="https://img.shields.io/github/stars/ccmbioinfo/runpal" /></a>
+        <img src="https://img.shields.io/github/stars/ccmbioinfo/ccm_runpal" /></a>
     <a href="" alt="Issues">
-        <img src="https://img.shields.io/github/issues/ccmbioinfo/runpal" /></a>
-    <a href="https://ccmbioinfo.github.io/runpal/">
-        <img alt="Documentation" src="https://img.shields.io/website?url=https%3A%2F%2Fccmbioinfo.github.io%2Fccm_runpal%2F&label=Documentation"></a>
+        <img src="https://img.shields.io/github/issues/ccmbioinfo/ccm_runpal" /></a>
 </p>
 
 # CCM RunPal
@@ -32,7 +30,7 @@ The `ContainerRunner` class provides a unified interface for:
 ### Basic Local Container Execution
 
 ```python
-from benchmate.container_runner.container_runner import ContainerRunner
+from runpal.runner import ContainerRunner
 
 # Initialize with engine + container/image
 runner = ContainerRunner(
@@ -120,9 +118,81 @@ If both `preset` and manual CPU/memory parameters are provided, the preset value
 
 ### SLURM Job Helpers
 
+There is a little bit of an overlap between the `SlurmRunner` (see below) and `ContainerRunner`, you can use whatever
+one you like. Slurm runner is more for running general jobs, for example you have a database connection that you can pull data
+from and that will automagically generate a slurm script and using slurm runner you can upload the script and submit the job in 
+2 lines of code.
+
 ```python
-status = runner.check_slurm_job_status(job_id)
-job_info = runner.get_slurm_job_info(job_id)
+from runpal.runner import ContainerRunner
+
+c_runner=ContainerRunner()
+status = c_runner.check_slurm_job_status(job_id)
+job_info = c_runner.get_slurm_job_info(job_id)
+```
+
+
+## Logging in transfering files to and from HPC
+
+This module is for general maintanence, accounting and other HPC related activities
+
+```python
+from runpal.slurm import SlurmRunner
+
+runner=SlurmRunner(api_host="where.your.hpc.openapi.is", "slogin.your.hpc.com", "username", "password")
+
+#create a jwt for slurm
+token=runner.get_new_jwt() #by defaul this is good for a week, you can change the duration in second above, or just get a new one
+
+#file operations
+runner.send_file("where/your/file/is/locally", "where/you/want/the/file/tobe", force=False) #if true will overwrite otherwise will get an error
+runner.create_directory("name_of_dir", "path_of_dir", exists_ok=True, follow_symlinks=True) #kind of self explanatory
+runner.receive_file("remote_path_to_the_file", "where/to/downlaod/the/file", force=False)
+
+#job operations
+runner.run_job("command", "working_dir", options={})
+runner.run_job_ssh("path to the script to run", "working_director", options={slurm job options})
+```
+
+The difference between `run_job` and `run_job_ssh` is the latter submits the job from a remote machine like your laptop, whereas the
+other one submits the job from a login node. 
+
+## Container Creation
+
+This module allows you to create docker and singularit/apptainer containers from different sources. To be able to use
+docker related features you need to create a docker client like so:
+
+```python
+import docker
+
+client=docker.from_env() #assuming you have your credential in your env
+```
+
+`doccker.from_env` is just one way of creating a client. See [here](https://docker-py.readthedocs.io/en/stable/client.html) for more details.
+Keep in mind that the client can be any kind of registry not just dockerhub. If you have one that you (or your work) has created
+and maintains that's all good as well. 
+
+After that you can create containers.
+
+```python
+import docker
+from runpal.containers import Docker, Singularity
+
+client = docker.from_env()
+
+d_container=Docker(name="my_container")
+d_container.from_file(client, "path to Dockerfile", tag="awesome:latest")
+d_container.pull(client, "name of the image")
+d_container.push(client) #uses the name and tag of self
+
+#singlularity is as similar as it can be
+
+s_container=Singularity(path="path to the sif file")
+s_container.from_file(definition_file="def/file/path", output="where/to/save/the/file")
+s_container.from_docker(docker_image="A Docker instances from above", output="file path")
+s_container.from_dockerfile(dockerfile="path", output="path") #this one generates the docker image first
+s_container.pull(uri="where the container is", output="path the to sif file to be created")
+s_container.push(remote_uri="where to push the file") 
 ```
 
 ## Key Features

@@ -12,7 +12,7 @@ import subprocess
 @dataclass
 class Docker:
     name: str
-    client: docker.DockerClient
+    tag: str
 
     @classmethod
     def from_file(cls, client, dockerfile: str | Path, tag: str, ) -> "Docker":
